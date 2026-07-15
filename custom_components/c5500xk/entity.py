@@ -19,7 +19,7 @@ class C5500XKEntity(CoordinatorEntity):
         """Return device metadata, including versions learned after setup."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.serial)},
-            name="Quantum Fiber C5500XK",
+            name=self.coordinator.serial,
             manufacturer="Gemtek Technology Co., Ltd.",
             model="C5500XK",
             serial_number=(self.coordinator.data or {}).get("serial"),
