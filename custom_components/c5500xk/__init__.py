@@ -2,6 +2,7 @@
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from .const import (
@@ -17,6 +18,7 @@ from .coordinator import C5500XKCoordinator
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     _normalize_entity_registry(hass, entry)
+    _normalize_device_registry(hass, entry)
     coordinator = C5500XKCoordinator(hass, entry)
     await coordinator.async_load_cache()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
@@ -121,3 +123,15 @@ def _normalize_entity_registry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     data = dict(entry.data)
     data[CONF_ENTITY_DEFAULTS_APPLIED] = True
     hass.config_entries.async_update_entry(entry, data=data)
+
+
+def _normalize_device_registry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Replace the retired generic device name with the full serial."""
+    registry = dr.async_get(hass)
+    serial = entry.data[CONF_SERIAL]
+    for device in list(registry.devices.values()):
+        if (
+            entry.entry_id in device.config_entries
+            and device.name == "Quantum Fiber C5500XK"
+        ):
+            registry.async_update_device(device.id, name=serial)
