@@ -26,7 +26,7 @@ ADDRESS_RE = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle discovered or manually identified C5500XK devices."""
 
-    VERSION = 6
+    VERSION = 7
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
@@ -36,7 +36,7 @@ class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="not_supported")
         await self.async_set_unique_id(serial)
         self._abort_if_unique_id_configured(updates={CONF_ADDRESS: discovery_info.address})
-        self.context["title_placeholders"] = {"name": "C5500XK"}
+        self.context["title_placeholders"] = {"name": serial}
         self._discovery = discovery_info
         self._serial = serial
         return await self.async_step_confirm()
@@ -46,7 +46,7 @@ class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         if user_input is not None:
             return self.async_create_entry(
-                title="Quantum Fiber C5500XK",
+                title=self._serial,
                 data={CONF_ADDRESS: self._discovery.address, CONF_SERIAL: self._serial},
                 options={CONF_ENABLE_WRITES: False},
             )
@@ -65,7 +65,7 @@ class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(serial)
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title="Quantum Fiber C5500XK",
+                    title=serial,
                     data={CONF_ADDRESS: address, CONF_SERIAL: serial},
                     options={CONF_ENABLE_WRITES: False},
                 )

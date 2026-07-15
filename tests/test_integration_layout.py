@@ -51,6 +51,17 @@ def test_rotating_addresses_are_matched_by_serial() -> None:
     assert "await self.async_set_unique_id(serial)" in flow_source
 
 
+def test_device_and_entry_names_use_full_serial() -> None:
+    init_source = (ROOT / "custom_components/c5500xk/__init__.py").read_text()
+    entity_source = (ROOT / "custom_components/c5500xk/entity.py").read_text()
+    flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
+    assert "name=self.coordinator.serial" in entity_source
+    assert "title=self._serial" in flow_source
+    assert "title=serial" in flow_source
+    assert 'title == "Quantum Fiber C5500XK"' in init_source
+    assert "VERSION = 7" in flow_source
+
+
 def test_wan_identity_and_diagnostics_are_mapped() -> None:
     constants = (ROOT / "custom_components/c5500xk/const.py").read_text()
     sensors = (ROOT / "custom_components/c5500xk/sensor.py").read_text()
@@ -72,7 +83,7 @@ def test_existing_threshold_and_ping_sensors_are_migrated_disabled() -> None:
     flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
     assert "DEFAULT_DISABLED_SENSOR_KEYS" in init_source
     assert "RegistryEntryDisabler.INTEGRATION" in init_source
-    assert "VERSION = 6" in flow_source
+    assert "VERSION = 7" in flow_source
     assert "_normalize_entity_registry(hass, entry)" in init_source
 
 
@@ -80,5 +91,5 @@ def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.4"
+    assert manifest["version"] == "0.3.5"
     assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"

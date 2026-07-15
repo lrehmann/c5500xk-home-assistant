@@ -33,26 +33,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Remove the retired collector API settings while preserving device identity."""
-    if entry.version > 6:
+    if entry.version > 7:
         return False
     data = dict(entry.data)
     if entry.version < 3:
         if CONF_ADDRESS not in entry.data or CONF_SERIAL not in entry.data:
             return False
         data = {CONF_ADDRESS: entry.data[CONF_ADDRESS], CONF_SERIAL: entry.data[CONF_SERIAL]}
+    serial = data[CONF_SERIAL]
     unique_id = entry.unique_id
     if entry.version < 6:
-        serial = data[CONF_SERIAL]
         if not any(
             other.entry_id != entry.entry_id and other.unique_id == serial
             for other in hass.config_entries.async_entries(DOMAIN)
         ):
             unique_id = serial
+    title = entry.title
+    if entry.version < 7 and title == "Quantum Fiber C5500XK":
+        title = serial
     hass.config_entries.async_update_entry(
         entry,
         data=data,
+        title=title,
         unique_id=unique_id,
-        version=6,
+        version=7,
     )
     return True
 
