@@ -28,6 +28,7 @@ DEFAULT_DISABLED_SENSOR_KEYS = {
 
 CONF_ADDRESS = "address"
 CONF_SERIAL = "serial"
+CONF_ENTITY_DEFAULTS_APPLIED = "entity_defaults_applied"
 AUTH_PREFIX = b"J6rV^ntpNGFpk^ruk7FXhPKh5ak@3A6P"
 STRING_KEYS = {
     "serial",

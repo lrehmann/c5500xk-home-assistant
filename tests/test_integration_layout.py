@@ -68,12 +68,13 @@ def test_existing_threshold_and_ping_sensors_are_migrated_disabled() -> None:
     flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
     assert "DEFAULT_DISABLED_SENSOR_KEYS" in init_source
     assert "RegistryEntryDisabler.INTEGRATION" in init_source
-    assert "VERSION = 5" in flow_source
+    assert "VERSION = 6" in flow_source
+    assert "_normalize_entity_registry(hass, entry)" in init_source
 
 
 def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.1"
+    assert manifest["version"] == "0.3.2"
     assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"
