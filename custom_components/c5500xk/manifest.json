@@ -1,0 +1,18 @@
+{
+  "domain": "c5500xk",
+  "name": "Quantum Fiber ONT Bluetooth",
+  "bluetooth": [
+    {
+      "local_name": "C5500XK*",
+      "connectable": true
+    }
+  ],
+  "codeowners": ["@lrehmann"],
+  "config_flow": true,
+  "dependencies": ["bluetooth"],
+  "documentation": "https://github.com/lrehmann/c5500xk-home-assistant",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/lrehmann/c5500xk-home-assistant/issues",
+  "version": "0.3.0"
+}
