@@ -59,6 +59,8 @@ def test_device_and_entry_names_use_full_serial() -> None:
     assert "title=self._serial" in flow_source
     assert "title=serial" in flow_source
     assert 'title == "Quantum Fiber C5500XK"' in init_source
+    assert "_normalize_device_registry(hass, entry)" in init_source
+    assert "registry.async_update_device(device.id, name=serial)" in init_source
     assert "VERSION = 7" in flow_source
 
 
@@ -91,5 +93,5 @@ def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.5"
+    assert manifest["version"] == "0.3.6"
     assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"
