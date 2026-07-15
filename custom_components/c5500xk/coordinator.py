@@ -116,7 +116,8 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
         ):
             return
         self._next_advertisement_refresh = now + ADVERTISEMENT_REFRESH_COOLDOWN
-        self._advertisement_refresh_task = self.hass.async_create_task(
+        self._advertisement_refresh_task = self.entry.async_create_background_task(
+            self.hass,
             self._async_refresh_from_advertisement(),
             f"C5500XK advertisement refresh {self.address}",
         )
