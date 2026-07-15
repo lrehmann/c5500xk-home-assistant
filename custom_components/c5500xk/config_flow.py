@@ -26,7 +26,7 @@ ADDRESS_RE = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle discovered or manually identified C5500XK devices."""
 
-    VERSION = 5
+    VERSION = 6
 
     async def async_step_bluetooth(
         self, discovery_info: BluetoothServiceInfoBleak
