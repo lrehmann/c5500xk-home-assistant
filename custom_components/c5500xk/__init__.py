@@ -28,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_create_background_task(
         hass,
         coordinator.async_refresh(),
-        f"Initial C5500XK Bluetooth refresh {coordinator.address}",
+        f"Initial {coordinator.model} Bluetooth refresh {coordinator.address}",
     )
     return True
 

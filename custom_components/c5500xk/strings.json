@@ -5,12 +5,12 @@
     },
     "error": {
       "invalid_address": "Enter a Bluetooth address in XX:XX:XX:XX:XX:XX form.",
-      "invalid_serial": "Enter the full C5500XK serial advertised by the ONT."
+      "invalid_serial": "Enter the full C5500XK or C6500XK serial advertised by the SmartNID."
     },
     "step": {
       "confirm": {
-        "description": "Add the discovered Quantum Fiber C5500XK? Connections use Home Assistant Bluetooth, including connectable ESPHome proxies. Operational write controls remain disabled by default.",
-        "title": "Quantum Fiber C5500XK"
+        "description": "Add this discovered Quantum Fiber SmartNID? Connections use Home Assistant Bluetooth, including connectable ESPHome proxies. C6500XK support is experimental and read-only. Operational write controls remain disabled by default.",
+        "title": "Quantum Fiber SmartNID"
       },
       "user": {
         "data": {
@@ -18,7 +18,7 @@
           "serial": "ONT advertised serial"
         },
         "description": "Enter the ONT identity if its short Bluetooth advertising window is currently closed. A connectable Home Assistant Bluetooth proxy must see a fresh advertisement before monitoring can connect.",
-        "title": "Quantum Fiber C5500XK"
+        "title": "Quantum Fiber SmartNID"
       }
     }
   },
@@ -31,8 +31,8 @@
           "ping_repetitions": "Ping repetitions",
           "ping_size": "Ping payload size"
         },
-        "description": "Write buttons are disabled entities and unavailable unless explicitly enabled here. Enabling does not press them.",
-        "title": "C5500XK options"
+        "description": "Write buttons are disabled entities and unavailable unless explicitly enabled here. Enabling does not press them. Operational writes remain blocked for experimental C6500XK devices.",
+        "title": "SmartNID options"
       }
     }
   }

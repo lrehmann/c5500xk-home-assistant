@@ -5,6 +5,10 @@
     {
       "local_name": "C5500XK*",
       "connectable": true
+    },
+    {
+      "local_name": "C6500XK*",
+      "connectable": true
     }
   ],
   "codeowners": ["@lrehmann"],
@@ -14,5 +18,5 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/lrehmann/c5500xk-home-assistant/issues",
-  "version": "0.3.6"
+  "version": "0.4.0"
 }

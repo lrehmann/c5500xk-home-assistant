@@ -33,7 +33,9 @@ from .const import (
     CONNECTION_RETRY_DELAYS,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    EXPERIMENTAL_MODELS,
     UUIDS,
+    model_from_serial,
 )
 from .protocol import build_auth_payload, decode_value, parse_advertisement_token
 
@@ -43,16 +45,19 @@ _CRITICAL_READS = ("pon_status", "rx_optical")
 
 class C5500XKCoordinator(DataUpdateCoordinator[dict]):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        model = model_from_serial(entry.data[CONF_SERIAL])
         super().__init__(
             hass,
             _LOGGER,
-            name=f"C5500XK {entry.data[CONF_ADDRESS]}",
+            name=f"{model} {entry.data[CONF_ADDRESS]}",
             update_interval=DEFAULT_SCAN_INTERVAL,
             config_entry=entry,
         )
         self.entry = entry
         self.address = entry.data[CONF_ADDRESS]
         self.serial = entry.data[CONF_SERIAL]
+        self.model = model
+        self.experimental = self.model in EXPERIMENTAL_MODELS
         self.data = {"serial": self.serial}
         self.has_attempted_update = False
         self._operation_lock = asyncio.Lock()
@@ -119,7 +124,7 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
         self._advertisement_refresh_task = self.entry.async_create_background_task(
             self.hass,
             self._async_refresh_from_advertisement(),
-            f"C5500XK advertisement refresh {self.address}",
+            f"{self.model} advertisement refresh {self.address}",
         )
 
     async def _async_refresh_from_advertisement(self) -> None:
@@ -221,7 +226,8 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
                 except Exception as err:
                     last_error = err
                     _LOGGER.debug(
-                        "C5500XK Bluetooth attempt %s/%s failed: %s",
+                        "%s Bluetooth attempt %s/%s failed: %s",
+                        self.model,
                         attempt + 1,
                         CONNECTION_ATTEMPTS,
                         err,
@@ -237,6 +243,10 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
 
     async def async_write(self, writes: list[tuple[str, bytes]]) -> None:
         """Authenticate and perform an explicitly requested write sequence."""
+        if self.experimental:
+            raise HomeAssistantError(
+                f"Operational writes are blocked for unverified {self.model} support"
+            )
         async with self._operation_lock:
             try:
                 client, _, _ = await self._connect_authenticated()

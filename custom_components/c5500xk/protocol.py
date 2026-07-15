@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 
-from .const import AUTH_PREFIX, SIGNED_MILLI_KEYS, STRING_KEYS
+from .const import AUTH_PREFIX, SIGNED_MILLI_KEYS, STRING_KEYS, model_from_serial
 
 
 def parse_advertisement_token(raw: bytes) -> bytes:
@@ -27,7 +27,8 @@ def parse_advertisement_token(raw: bytes) -> bytes:
 
 
 def build_auth_payload(serial: str, token: bytes, nonce: bytes | None = None) -> bytes:
-    """Build the verified 64-byte application-authentication payload."""
+    """Build the model-profile 64-byte application-authentication payload."""
+    model_from_serial(serial)
     if len(token) != 8:
         raise ValueError("advertisement token must be eight bytes")
     nonce = nonce if nonce is not None else os.urandom(32)

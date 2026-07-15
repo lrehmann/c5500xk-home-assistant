@@ -21,7 +21,7 @@ class C5500XKEntity(CoordinatorEntity):
             identifiers={(DOMAIN, self.coordinator.serial)},
             name=self.coordinator.serial,
             manufacturer="Gemtek Technology Co., Ltd.",
-            model="C5500XK",
+            model=self.coordinator.model,
             serial_number=(self.coordinator.data or {}).get("serial"),
             sw_version=(self.coordinator.data or {}).get("software_version"),
             hw_version=(self.coordinator.data or {}).get("hardware_version"),
