@@ -3,6 +3,8 @@
 from datetime import timedelta
 
 DOMAIN = "c5500xk"
+SUPPORTED_MODELS = ("C5500XK", "C6500XK")
+EXPERIMENTAL_MODELS = frozenset({"C6500XK"})
 PLATFORMS = ["binary_sensor", "button", "sensor"]
 DEFAULT_SCAN_INTERVAL = timedelta(minutes=5)
 ADVERTISEMENT_MAX_AGE = 20
@@ -108,3 +110,12 @@ CONF_ENABLE_WRITES = "enable_write_actions"
 CONF_PING_HOST = "ping_host"
 CONF_PING_SIZE = "ping_size"
 CONF_PING_REPETITIONS = "ping_repetitions"
+
+
+def model_from_serial(serial: str) -> str:
+    """Return the supported SmartNID model encoded in an advertised serial."""
+    for model in SUPPORTED_MODELS:
+        suffix = serial.removeprefix(model)
+        if suffix != serial and suffix.isdigit():
+            return model
+    raise ValueError(f"Unsupported SmartNID serial: {serial}")

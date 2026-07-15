@@ -17,14 +17,23 @@ from .const import (
     CONF_PING_SIZE,
     CONF_SERIAL,
     DOMAIN,
+    model_from_serial,
 )
 
-SERIAL_RE = re.compile(r"^C5500XK\d+$")
 ADDRESS_RE = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 
 
+def is_supported_serial(serial: str) -> bool:
+    """Return whether a serial identifies a supported SmartNID model."""
+    try:
+        model_from_serial(serial)
+    except ValueError:
+        return False
+    return True
+
+
 class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle discovered or manually identified C5500XK devices."""
+    """Handle discovered or manually identified supported SmartNIDs."""
 
     VERSION = 7
 
@@ -32,7 +41,7 @@ class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, discovery_info: BluetoothServiceInfoBleak
     ) -> config_entries.ConfigFlowResult:
         serial = discovery_info.name
-        if not SERIAL_RE.fullmatch(serial):
+        if not is_supported_serial(serial):
             return self.async_abort(reason="not_supported")
         await self.async_set_unique_id(serial)
         self._abort_if_unique_id_configured(updates={CONF_ADDRESS: discovery_info.address})
@@ -59,7 +68,7 @@ class C5500XKConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             serial = user_input[CONF_SERIAL]
             if not ADDRESS_RE.fullmatch(address):
                 errors["base"] = "invalid_address"
-            elif not SERIAL_RE.fullmatch(serial):
+            elif not is_supported_serial(serial):
                 errors["base"] = "invalid_serial"
             else:
                 await self.async_set_unique_id(serial)

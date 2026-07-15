@@ -46,7 +46,8 @@ class C5500XKButton(C5500XKEntity, ButtonEntity):
     @property
     def available(self):
         return (
-            self.coordinator.last_update_success
+            not self.coordinator.experimental
+            and self.coordinator.last_update_success
             and self.entry.options.get(CONF_ENABLE_WRITES, False)
             and self.coordinator.data.get("authenticated", False)
         )

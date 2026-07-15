@@ -13,7 +13,7 @@ package = ModuleType("custom_components.c5500xk")
 package.__path__ = [str(Path(__file__).parents[1] / "custom_components" / "c5500xk")]
 sys.modules.setdefault("custom_components.c5500xk", package)
 
-from custom_components.c5500xk.const import AUTH_PREFIX
+from custom_components.c5500xk.const import AUTH_PREFIX, model_from_serial
 from custom_components.c5500xk.protocol import (
     build_auth_payload,
     decode_value,
@@ -35,14 +35,31 @@ def test_parse_rejects_aggregated_or_truncated_data() -> None:
         parse_advertisement_token(bytes.fromhex("09ff4142434445463032"))
 
 
-def test_build_auth_payload() -> None:
-    serial = "C5500XK0000000000"
+@pytest.mark.parametrize("serial", ["C5500XK0000000000", "C6500XK0000000000"])
+def test_build_auth_payload_for_supported_models(serial: str) -> None:
     token = b"ABCDEF01"
     nonce = bytes(range(32))
     payload = build_auth_payload(serial, token, nonce)
     expected = hashlib.sha256(AUTH_PREFIX + serial.encode() + token).digest()
     assert payload == expected + nonce
     assert len(payload) == 64
+
+
+@pytest.mark.parametrize(
+    ("serial", "expected"),
+    [
+        ("C5500XK0000000000", "C5500XK"),
+        ("C6500XK0000000000", "C6500XK"),
+    ],
+)
+def test_model_from_serial(serial: str, expected: str) -> None:
+    assert model_from_serial(serial) == expected
+
+
+@pytest.mark.parametrize("serial", ["C6500XK", "C4500XK0000000000", "C6500XKABC"])
+def test_model_from_serial_rejects_unsupported_shape(serial: str) -> None:
+    with pytest.raises(ValueError):
+        model_from_serial(serial)
 
 
 @pytest.mark.parametrize(

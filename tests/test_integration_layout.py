@@ -9,7 +9,10 @@ ROOT = Path(__file__).parents[1]
 def test_manifest_uses_home_assistant_bluetooth() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     assert manifest["dependencies"] == ["bluetooth"]
-    assert manifest["bluetooth"] == [{"local_name": "C5500XK*", "connectable": True}]
+    assert manifest["bluetooth"] == [
+        {"local_name": "C5500XK*", "connectable": True},
+        {"local_name": "C6500XK*", "connectable": True},
+    ]
 
 
 def test_hacs_integration_has_no_external_collector() -> None:
@@ -49,6 +52,26 @@ def test_rotating_addresses_are_matched_by_serial() -> None:
     assert "async_discovered_service_info" in source
     assert 'f"{coordinator.serial}_{key}"' in entity_source
     assert "await self.async_set_unique_id(serial)" in flow_source
+
+
+def test_c6500xk_uses_full_serial_for_pairing_and_authentication() -> None:
+    source = (ROOT / "custom_components/c5500xk/coordinator.py").read_text()
+    flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
+    constants = (ROOT / "custom_components/c5500xk/const.py").read_text()
+    assert 'SUPPORTED_MODELS = ("C5500XK", "C6500XK")' in constants
+    assert "is_supported_serial(serial)" in flow_source
+    assert "self.serial," in source
+    assert "pair=True" in source
+    assert "build_auth_payload(self.serial, token)" in source
+    assert "if not all(key in fresh for key in _CRITICAL_READS)" in source
+
+
+def test_c6500xk_operational_writes_are_blocked() -> None:
+    coordinator = (ROOT / "custom_components/c5500xk/coordinator.py").read_text()
+    button = (ROOT / "custom_components/c5500xk/button.py").read_text()
+    assert "if self.experimental:" in coordinator
+    assert "Operational writes are blocked" in coordinator
+    assert "not self.coordinator.experimental" in button
 
 
 def test_device_and_entry_names_use_full_serial() -> None:
@@ -93,5 +116,5 @@ def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.6"
-    assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"
+    assert manifest["version"] == "0.4.0"
+    assert hacs["name"] == "Quantum Fiber SmartNID Bluetooth"
