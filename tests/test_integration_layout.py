@@ -35,6 +35,7 @@ def test_connection_retries_are_bounded() -> None:
     assert "for attempt in range(CONNECTION_ATTEMPTS)" in source
     assert "CONNECTION_ATTEMPTS = 3" in constants
     assert "ADVERTISEMENT_REFRESH_COOLDOWN = 15" in constants
+    assert "entry.async_on_unload(self._cancel_advertisement_refresh)" in source
 
 
 def test_rotating_addresses_are_matched_by_serial() -> None:
@@ -76,5 +77,5 @@ def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.2"
+    assert manifest["version"] == "0.3.3"
     assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"

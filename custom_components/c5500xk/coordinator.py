@@ -69,6 +69,7 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
                 BluetoothScanningMode.ACTIVE,
             )
         )
+        entry.async_on_unload(self._cancel_advertisement_refresh)
 
     def _find_latest_service_info(self):
         """Find this physical ONT even when its resolvable BLE address rotates."""
@@ -123,6 +124,14 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
     async def _async_refresh_from_advertisement(self) -> None:
         """Request a coordinator refresh without blocking the Bluetooth callback."""
         await self.async_request_refresh()
+
+    def _cancel_advertisement_refresh(self) -> None:
+        """Cancel an advertisement-triggered refresh when the entry unloads."""
+        if (
+            self._advertisement_refresh_task is not None
+            and not self._advertisement_refresh_task.done()
+        ):
+            self._advertisement_refresh_task.cancel()
 
     async def _connection_inputs(self):
         service_info = self._service_info
