@@ -11,6 +11,7 @@ from bleak_retry_connector import BleakClientWithServiceCache, establish_connect
 from homeassistant.components.bluetooth import (
     BluetoothCallbackMatcher,
     BluetoothScanningMode,
+    async_discovered_service_info,
     async_last_service_info,
     async_register_callback,
 )
@@ -59,15 +60,26 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
         self._advertisement_refresh_task: asyncio.Task | None = None
         self._next_advertisement_refresh = 0.0
         self._store = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}")
-        self._service_info = async_last_service_info(hass, self.address, connectable=True)
+        self._service_info = self._find_latest_service_info()
         entry.async_on_unload(
             async_register_callback(
                 hass,
                 self._async_advertisement,
-                BluetoothCallbackMatcher(address=self.address),
+                BluetoothCallbackMatcher(local_name=self.serial, connectable=True),
                 BluetoothScanningMode.ACTIVE,
             )
         )
+
+    def _find_latest_service_info(self):
+        """Find this physical ONT even when its resolvable BLE address rotates."""
+        matches = [
+            info
+            for info in async_discovered_service_info(self.hass, connectable=True)
+            if info.name == self.serial
+        ]
+        if matches:
+            return max(matches, key=lambda info: info.time)
+        return async_last_service_info(self.hass, self.address, connectable=True)
 
     async def async_load_cache(self) -> None:
         """Restore the last successful values before the first Bluetooth attempt."""
@@ -90,6 +102,7 @@ class C5500XKCoordinator(DataUpdateCoordinator[dict]):
     def _async_advertisement(self, service_info, change) -> None:
         """Keep the current raw token and retry on each available connection window."""
         self._service_info = service_info
+        self.address = service_info.address
         self._advertisement_event.set()
         if self._operation_lock.locked():
             return

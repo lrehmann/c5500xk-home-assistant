@@ -12,13 +12,13 @@ class C5500XKEntity(CoordinatorEntity):
     def __init__(self, coordinator, key: str) -> None:
         super().__init__(coordinator)
         self.entity_key = key
-        self._attr_unique_id = f"{coordinator.address}_{key}"
+        self._attr_unique_id = f"{coordinator.serial}_{key}"
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device metadata, including versions learned after setup."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self.coordinator.address)},
+            identifiers={(DOMAIN, self.coordinator.serial)},
             name="Quantum Fiber C5500XK",
             manufacturer="Gemtek Technology Co., Ltd.",
             model="C5500XK",
