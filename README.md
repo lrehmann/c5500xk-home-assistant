@@ -14,6 +14,8 @@ The protocol mappings and validation evidence are documented separately in the
 - Caches successful readings so known values survive a Home Assistant restart.
 - Reports Bluetooth connection health separately from the retained readings.
 - Retries failed connections three times and coalesces frequent advertisements.
+- Follows the advertised device serial across resolvable Bluetooth address
+  rotation instead of pinning the ONT to one transient MAC address.
 - Uses fresh advertisements from Home Assistant's best available connectable
   Bluetooth source, including ESPHome proxies.
 - Leaves every operational write button disabled unless explicitly enabled.
@@ -43,6 +45,10 @@ by default. They can be enabled individually from the device's entity page.
 
 The ONT must be visible to a connectable Home Assistant Bluetooth adapter or an
 active ESPHome Bluetooth proxy during a connection window.
+
+Older manual installations may contain duplicate device entries created when a
+resolvable Bluetooth address changed. Keep the entry for the intended ONT
+serial and remove duplicate entries for that same serial before upgrading.
 
 ## Operational writes
 

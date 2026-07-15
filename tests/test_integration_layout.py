@@ -37,6 +37,16 @@ def test_connection_retries_are_bounded() -> None:
     assert "ADVERTISEMENT_REFRESH_COOLDOWN = 15" in constants
 
 
+def test_rotating_addresses_are_matched_by_serial() -> None:
+    source = (ROOT / "custom_components/c5500xk/coordinator.py").read_text()
+    entity_source = (ROOT / "custom_components/c5500xk/entity.py").read_text()
+    flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
+    assert "BluetoothCallbackMatcher(local_name=self.serial" in source
+    assert "async_discovered_service_info" in source
+    assert 'f"{coordinator.serial}_{key}"' in entity_source
+    assert "await self.async_set_unique_id(serial)" in flow_source
+
+
 def test_wan_identity_and_diagnostics_are_mapped() -> None:
     constants = (ROOT / "custom_components/c5500xk/const.py").read_text()
     sensors = (ROOT / "custom_components/c5500xk/sensor.py").read_text()
@@ -58,12 +68,12 @@ def test_existing_threshold_and_ping_sensors_are_migrated_disabled() -> None:
     flow_source = (ROOT / "custom_components/c5500xk/config_flow.py").read_text()
     assert "DEFAULT_DISABLED_SENSOR_KEYS" in init_source
     assert "RegistryEntryDisabler.INTEGRATION" in init_source
-    assert "VERSION = 4" in flow_source
+    assert "VERSION = 5" in flow_source
 
 
 def test_standalone_hacs_metadata() -> None:
     manifest = json.loads((ROOT / "custom_components/c5500xk/manifest.json").read_text())
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
-    assert manifest["version"] == "0.3.0"
+    assert manifest["version"] == "0.3.1"
     assert hacs["name"] == "Quantum Fiber C5500XK Bluetooth"

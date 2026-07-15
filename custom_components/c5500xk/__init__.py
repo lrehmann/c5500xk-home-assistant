@@ -18,7 +18,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = C5500XKCoordinator(hass, entry)
     await coordinator.async_load_cache()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
-    _remove_collector_entities(hass, coordinator.address)
+    _remove_collector_entities(hass, coordinator.serial)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
     hass.async_create_task(
@@ -30,7 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Remove the retired collector API settings while preserving device identity."""
-    if entry.version > 4:
+    if entry.version > 5:
         return False
     data = dict(entry.data)
     if entry.version < 3:
@@ -50,7 +50,38 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     entity_id,
                     disabled_by=er.RegistryEntryDisabler.INTEGRATION,
                 )
-    hass.config_entries.async_update_entry(entry, data=data, version=4)
+    unique_id = entry.unique_id
+    if entry.version < 5:
+        registry = er.async_get(hass)
+        address = data[CONF_ADDRESS]
+        serial = data[CONF_SERIAL]
+        old_prefix = f"{address}_"
+        for registry_entry in list(registry.entities.values()):
+            if (
+                registry_entry.config_entry_id != entry.entry_id
+                or not registry_entry.unique_id.startswith(old_prefix)
+            ):
+                continue
+            suffix = registry_entry.unique_id.removeprefix(old_prefix)
+            new_unique_id = f"{serial}_{suffix}"
+            if registry.async_get_entity_id(
+                registry_entry.domain, DOMAIN, new_unique_id
+            ) is None:
+                registry.async_update_entity(
+                    registry_entry.entity_id,
+                    new_unique_id=new_unique_id,
+                )
+        if not any(
+            other.entry_id != entry.entry_id and other.unique_id == serial
+            for other in hass.config_entries.async_entries(DOMAIN)
+        ):
+            unique_id = serial
+    hass.config_entries.async_update_entry(
+        entry,
+        data=data,
+        unique_id=unique_id,
+        version=5,
+    )
     return True
 
 
@@ -64,7 +95,7 @@ async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
 
-def _remove_collector_entities(hass: HomeAssistant, address: str) -> None:
+def _remove_collector_entities(hass: HomeAssistant, identity: str) -> None:
     """Remove entities that existed only for the retired external collector."""
     registry = er.async_get(hass)
     for platform, key in (
@@ -73,5 +104,5 @@ def _remove_collector_entities(hass: HomeAssistant, address: str) -> None:
         ("sensor", "last_error"),
         ("binary_sensor", "writes_allowed"),
     ):
-        if entity_id := registry.async_get_entity_id(platform, DOMAIN, f"{address}_{key}"):
+        if entity_id := registry.async_get_entity_id(platform, DOMAIN, f"{identity}_{key}"):
             registry.async_remove(entity_id)
