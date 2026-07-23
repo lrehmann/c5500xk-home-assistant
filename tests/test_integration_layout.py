@@ -117,4 +117,8 @@ def test_standalone_hacs_metadata() -> None:
     hacs = json.loads((ROOT / "hacs.json").read_text())
     assert manifest["documentation"].endswith("/c5500xk-home-assistant")
     assert manifest["version"] == "0.4.0"
+    assert hacs["country"] == "US"
     assert hacs["name"] == "Quantum Fiber SmartNID Bluetooth"
+    assert (ROOT / "custom_components/c5500xk/brand/icon.png").read_bytes().startswith(
+        b"\x89PNG\r\n\x1a\n"
+    )
