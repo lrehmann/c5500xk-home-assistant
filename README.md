@@ -8,6 +8,8 @@ collector.
 The protocol mappings and validation evidence are documented separately in the
 [C5500XK BLE research repository](https://github.com/lrehmann/c5500xk-ble-research).
 
+[![Open your Home Assistant instance and add this repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=lrehmann&repository=c5500xk-home-assistant&category=integration)
+
 > [!IMPORTANT]
 > C5500XK support was validated against a real device. C6500XK support is an
 > experimental compatibility profile added without access to C6500XK hardware
@@ -49,6 +51,8 @@ Optical threshold sensors and all sensors with `Ping` in their name are disabled
 by default. They can be enabled individually from the device's entity page.
 
 ## Installation with HACS
+
+Use the button above, or add the repository manually:
 
 1. In HACS, open **Integrations** and choose **Custom repositories**.
 2. Add `https://github.com/lrehmann/c5500xk-home-assistant` as an
